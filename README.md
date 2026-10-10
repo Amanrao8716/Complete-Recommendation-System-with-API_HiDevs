@@ -11,6 +11,13 @@ User Request → API → RecommendationOrchestrator → Database (SQLite)
               Metrics     Cache + candidate generation + scoring
 ```
 
+## Demo Video
+
+📺 **Watch the Walkthrough Demo Video on YouTube:**  
+👉 [https://youtu.be/UPD8I01FZa8](https://youtu.be/UPD8I01FZa8)
+
+[![Recommendation System Demo Video](https://img.youtube.com/vi/UPD8I01FZa8/maxresdefault.jpg)](https://youtu.be/UPD8I01FZa8)
+
 ## Quick start
 
 ```bash
@@ -43,10 +50,11 @@ In GitHub Codespaces, forward port 5000 and use the forwarded URL.
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/recommend/<user_id>?limit=5&strategy=auto` | Recommendations (limit 1-50). Strategies: `auto`, `hybrid`, `skill_based`, `collaborative`, `popularity`, `cold_start` |
+| GET | `/` | Web UI Dashboard & API Explorer (or JSON if requested) |
+| GET | `/recommend/<user_id>?limit=5&strategy=auto` | Recommendations (limit 1-50). Strategies: `auto`, `hybrid`, `skill_based`, `collaborative`, `popularity`, `cold_start` (HTML in browser, JSON for API) |
 | POST | `/feedback` | Body: `{"user_id", "content_id", "type", "rating"?}`; `type` is `view`, `like`, `complete`, `rate` (needs `rating`) or `dislike`; `rating` 1-5 |
-| GET | `/health` | Liveness + DB check |
-| GET | `/metrics` | Request counts, latency percentiles per endpoint, cache hit rate |
+| GET | `/health` | Liveness + DB check (HTML in browser, JSON for API) |
+| GET | `/metrics` | Request counts, latency percentiles per endpoint, cache hit rate (HTML in browser, JSON for API) |
 
 Every response carries an `X-Request-ID` header (a client-supplied one is
 echoed back) which also appears in the logs and in error bodies.
