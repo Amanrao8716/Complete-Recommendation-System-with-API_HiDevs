@@ -1,0 +1,494 @@
+{
+  "info": {
+    "name": "Day 30 Recommendation API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Seed first: python scripts/seed_data.py --reset (40 users, 60 content). If API_KEY is set on the server, enable the X-API-Key header."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:5000"
+    },
+    {
+      "key": "api_key",
+      "value": "secret"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "health"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('db ok', () => pm.expect(pm.response.json().database).to.eql('ok'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recommend (default)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/recommend/1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "recommend",
+            "1"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('5 recommendations', () => pm.expect(pm.response.json().recommendations.length).to.eql(5));",
+              "pm.test('has request id header', () => pm.response.to.have.header('X-Request-ID'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recommend (limit + strategy)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/recommend/1?limit=3&strategy=skill_based",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "recommend",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "3"
+            },
+            {
+              "key": "strategy",
+              "value": "skill_based"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('strategy echoed', () => pm.expect(pm.response.json().strategy).to.eql('skill_based'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recommend (cold start user)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/recommend/41?limit=3",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "recommend",
+            "41"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "3"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feedback - complete",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "disabled": true
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/feedback",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "feedback"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": 1,\n  \"content_id\": 7,\n  \"type\": \"complete\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feedback - rating",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "disabled": true
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/feedback",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "feedback"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": 1,\n  \"content_id\": 8,\n  \"type\": \"rate\",\n  \"rating\": 4\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error: unknown user (404)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/recommend/99999",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "recommend",
+            "99999"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error: bad limit (400)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/recommend/1?limit=0",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "recommend",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "0"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error: bad strategy (400)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/recommend/1?strategy=magic",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "recommend",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "strategy",
+              "value": "magic"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error: invalid feedback type (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "disabled": true
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/feedback",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "feedback"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": 1,\n  \"content_id\": 7,\n  \"type\": \"share\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error: unknown content (404)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "disabled": true
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/feedback",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "feedback"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": 1,\n  \"content_id\": 99999,\n  \"type\": \"like\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Metrics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/metrics",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "metrics"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('has cache stats', () => pm.expect(pm.response.json().recommender.cache).to.have.property('hit_rate'));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

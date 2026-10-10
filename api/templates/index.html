@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recommendation Engine API</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card-bg: rgba(22, 30, 46, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover-border: rgba(56, 189, 248, 0.35);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      --accent: #818cf8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 85% 80%, rgba(129, 140, 248, 0.07) 0%, transparent 40%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header {
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      background: rgba(11, 15, 23, 0.7);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--primary-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35);
+      font-size: 20px;
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      display: inline-block;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      border: none;
+      outline: none;
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: #0b0f17;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      background: rgba(16, 185, 129, 0.1);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.9); }
+    }
+
+    /* Hero */
+    .hero {
+      padding: 40px 0 24px;
+      text-align: center;
+    }
+
+    .hero h2 {
+      font-size: 2.3rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 20%, #cbd5e1 60%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 650px;
+      margin: 0 auto 28px;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-card:hover {
+      border-color: var(--card-hover-border);
+      transform: translateY(-2px);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-hint {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    /* Main Grid Layout */
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    /* Section Card */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 28px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Form Controls */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) auto;
+      gap: 16px;
+      align-items: flex-end;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-control {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Results section */
+    .results-container {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .results-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 12px 16px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      margin-bottom: 18px;
+      font-size: 0.85rem;
+    }
+
+    .meta-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .meta-tag strong {
+      color: var(--text);
+    }
+
+    .recommendations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .rec-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .rec-card:hover {
+      border-color: var(--card-hover-border);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .rec-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .rec-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.35;
+    }
+
+    .rec-badge-rank {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      white-space: nowrap;
+    }
+
+    .rec-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 8px 0;
+    }
+
+    .pill {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .pill-category {
+      background: rgba(129, 140, 248, 0.15);
+      color: #a5b4fc;
+      border-color: rgba(129, 140, 248, 0.25);
+    }
+
+    .pill-difficulty {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fcd34d;
+      border-color: rgba(245, 158, 11, 0.25);
+    }
+
+    .rec-explanation {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border-left: 3px solid var(--primary);
+      line-height: 1.45;
+    }
+
+    .score-bar-container {
+      margin-top: 6px;
+    }
+
+    .score-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .score-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      background: var(--primary-gradient);
+      border-radius: 3px;
+    }
+
+    /* Endpoints Table */
+    .endpoint-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .endpoint-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+
+    .endpoint-row:hover {
+      border-color: var(--card-hover-border);
+      background: rgba(15, 23, 42, 0.85);
+    }
+
+    .endpoint-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .method {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .method-get {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .method-post {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .endpoint-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: #f8fafc;
+    }
+
+    .endpoint-desc {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    /* JSON Box */
+    pre.raw-json {
+      background: #060910;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      max-height: 250px;
+      margin-top: 14px;
+    }
+
+    .loader {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav-inner">
+      <a href="/" class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>Recommendation Engine</h1>
+          <span class="brand-badge">REST API &middot; v1.0</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <div class="status-badge" id="system-badge">
+          <span class="status-dot"></span>
+          <span id="system-status-text">Online</span>
+        </div>
+        <a href="/health" target="_blank" class="btn btn-outline">Health</a>
+        <a href="/metrics" target="_blank" class="btn btn-outline">Metrics</a>
+        <a href="/?format=json" class="btn btn-outline">Raw JSON</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="hero">
+      <h2>Learning Content Recommendation Service</h2>
+      <p>Multi-strategy engine featuring hybrid scoring, cold-start fallback, collaborative filtering, real-time feedback loop, and explainable recommendations.</p>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Active Users</span>
+        <span class="stat-value" id="stat-users">42</span>
+        <span class="stat-hint">Seeded test learner profiles</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Learning Modules</span>
+        <span class="stat-value" id="stat-content">60</span>
+        <span class="stat-hint">Catalog items with skills</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Engines & Strategies</span>
+        <span class="stat-value">5+</span>
+        <span class="stat-hint">Hybrid, Skill, Collab, Popularity</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Database Status</span>
+        <span class="stat-value" style="color: #34d399;" id="stat-db">SQLite OK</span>
+        <span class="stat-hint">Low latency indexed storage</span>
+      </div>
+    </div>
+
+    <div class="dashboard-layout">
+      <!-- Live Recommendation Playground -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <span>🎯</span> Live Recommendation Explorer
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Interactive API Tester</span>
+        </div>
+
+        <form id="rec-form" onsubmit="event.preventDefault(); runRecommendations();">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="user-id">User ID</label>
+              <input type="number" id="user-id" class="form-control" value="1" min="1" max="100" required>
+            </div>
+            <div class="form-group">
+              <label for="strategy">Recommendation Strategy</label>
+              <select id="strategy" class="form-control">
+                <option value="auto">auto (Intelligent Auto-Select)</option>
+                <option value="hybrid">hybrid (Balanced Multi-Criteria)</option>
+                <option value="skill_based">skill_based (Skill Gap Priority)</option>
+                <option value="collaborative">collaborative (User Similarity)</option>
+                <option value="popularity">popularity (Global Trending)</option>
+                <option value="cold_start">cold_start (New Learner Fallback)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="limit">Item Limit</label>
+              <input type="number" id="limit" class="form-control" value="4" min="1" max="20" required>
+            </div>
+            <button type="submit" id="rec-btn" class="btn btn-primary" style="height: 42px;">
+              Get Recommendations
+            </button>
+          </div>
+        </form>
+
+        <div id="results-container" class="results-container">
+          <div class="results-meta">
+            <span class="meta-tag">User: <strong id="res-user-id">-</strong></span>
+            <span class="meta-tag">Strategy: <strong id="res-strategy">-</strong></span>
+            <span class="meta-tag">Cache: <strong id="res-cached">-</strong></span>
+            <span class="meta-tag">Latency: <strong id="res-latency">-</strong></span>
+            <span class="meta-tag">Total: <strong id="res-count">-</strong> items</span>
+          </div>
+
+          <div id="rec-cards" class="recommendations-grid"></div>
+
+          <div style="margin-top: 20px;">
+            <button class="btn btn-outline" style="font-size: 0.75rem;" onclick="toggleJson()">
+              Toggle Raw API JSON
+            </button>
+            <pre id="raw-json" class="raw-json" style="display: none;"></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Feedback Tester -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <span>📝</span> Submit Feedback & Interaction
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Invalidates cache & updates learner model</span>
+        </div>
+
+        <form id="feedback-form" onsubmit="event.preventDefault(); submitFeedback();">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="fb-user-id">User ID</label>
+              <input type="number" id="fb-user-id" class="form-control" value="1" min="1" required>
+            </div>
+            <div class="form-group">
+              <label for="fb-content-id">Content ID</label>
+              <input type="number" id="fb-content-id" class="form-control" value="7" min="1" required>
+            </div>
+            <div class="form-group">
+              <label for="fb-type">Interaction Type</label>
+              <select id="fb-type" class="form-control" onchange="checkRatingRequirement()">
+                <option value="complete">complete (Finished module)</option>
+                <option value="like">like (Liked module)</option>
+                <option value="rate">rate (Provide 1-5 rating)</option>
+                <option value="view">view (Opened/Viewed)</option>
+                <option value="dislike">dislike (Negative signal)</option>
+              </select>
+            </div>
+            <div class="form-group" id="fb-rating-group" style="display: none;">
+              <label for="fb-rating">Rating (1-5)</label>
+              <input type="number" id="fb-rating" class="form-control" value="5" min="1" max="5" step="0.5">
+            </div>
+            <button type="submit" id="fb-btn" class="btn btn-primary" style="height: 42px;">
+              Post Feedback
+            </button>
+          </div>
+        </form>
+        <div id="fb-status" style="display: none; font-size: 0.85rem; padding: 10px 14px; border-radius: 8px; margin-top: 10px;"></div>
+      </div>
+
+      <!-- API Reference -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <span>🔌</span> REST API Endpoints Reference
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Standard HTTP JSON Endpoints</span>
+        </div>
+
+        <div class="endpoint-list">
+          <div class="endpoint-row">
+            <div class="endpoint-left">
+              <span class="method method-get">GET</span>
+              <div>
+                <a href="/recommend/1?limit=5" target="_blank" class="endpoint-path">/recommend/&lt;user_id&gt;?limit=5&strategy=auto</a>
+                <div class="endpoint-desc">Fetch personalized recommendations with explanations and component scores.</div>
+              </div>
+            </div>
+            <a href="/recommend/1?limit=5" target="_blank" class="btn btn-outline" style="font-size: 0.75rem;">Test in Browser</a>
+          </div>
+
+          <div class="endpoint-row">
+            <div class="endpoint-left">
+              <span class="method method-get">GET</span>
+              <div>
+                <a href="/health" target="_blank" class="endpoint-path">/health</a>
+                <div class="endpoint-desc">Health and liveness check returning database connectivity and entity counts.</div>
+              </div>
+            </div>
+            <a href="/health" target="_blank" class="btn btn-outline" style="font-size: 0.75rem;">Test in Browser</a>
+          </div>
+
+          <div class="endpoint-row">
+            <div class="endpoint-left">
+              <span class="method method-get">GET</span>
+              <div>
+                <a href="/metrics" target="_blank" class="endpoint-path">/metrics</a>
+                <div class="endpoint-desc">Service latency percentiles (p50, p95), total requests, and cache hit metrics.</div>
+              </div>
+            </div>
+            <a href="/metrics" target="_blank" class="btn btn-outline" style="font-size: 0.75rem;">Test in Browser</a>
+          </div>
+
+          <div class="endpoint-row">
+            <div class="endpoint-left">
+              <span class="method method-post">POST</span>
+              <div>
+                <span class="endpoint-path">/feedback</span>
+                <div class="endpoint-desc">Record learner actions (view, like, complete, rate, dislike) & update model state.</div>
+              </div>
+            </div>
+            <span class="meta-tag" style="font-size: 0.75rem; font-family: monospace;">{"user_id":1, "content_id":7, "type":"complete"}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Fetch live system health on page load
+    async function loadHealth() {
+      try {
+        const res = await fetch('/health');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('stat-users').innerText = data.users ?? 42;
+          document.getElementById('stat-content').innerText = data.content_items ?? 60;
+          document.getElementById('stat-db').innerText = data.database === 'ok' ? 'SQLite OK' : 'Degraded';
+          document.getElementById('system-status-text').innerText = 'Online (' + data.users + ' users)';
+        }
+      } catch (e) {
+        console.error('Failed to load health:', e);
+      }
+    }
+
+    // Run recommendations
+    async function runRecommendations() {
+      const uid = document.getElementById('user-id').value;
+      const strategy = document.getElementById('strategy').value;
+      const limit = document.getElementById('limit').value;
+      const btn = document.getElementById('rec-btn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="loader"></span> Loading...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`/recommend/${uid}?limit=${limit}&strategy=${strategy}`);
+        const data = await res.json();
+
+        const container = document.getElementById('results-container');
+        container.style.display = 'block';
+
+        if (res.ok) {
+          document.getElementById('res-user-id').innerText = data.user_id;
+          document.getElementById('res-strategy').innerText = data.strategy;
+          document.getElementById('res-cached').innerText = data.cached ? 'Yes (Hit)' : 'No (Fresh)';
+          document.getElementById('res-latency').innerText = data.latency_ms + 'ms';
+          document.getElementById('res-count').innerText = data.count;
+
+          const cardsBox = document.getElementById('rec-cards');
+          cardsBox.innerHTML = '';
+
+          if (!data.recommendations || data.recommendations.length === 0) {
+            cardsBox.innerHTML = '<div style="color: var(--text-muted); padding: 20px;">No recommendations found for this query.</div>';
+          } else {
+            data.recommendations.forEach((item, idx) => {
+              const card = document.createElement('div');
+              card.className = 'rec-card';
+              
+              const scorePct = Math.min(Math.round((item.score || 0) * 100), 100);
+              const difficultyStars = '★'.repeat(Math.min(item.difficulty || 1, 5)) + '☆'.repeat(Math.max(0, 5 - (item.difficulty || 1)));
+
+              card.innerHTML = `
+                <div>
+                  <div class="rec-card-top">
+                    <h3 class="rec-title">${item.title}</h3>
+                    <span class="rec-badge-rank">#${idx + 1}</span>
+                  </div>
+                  <div class="rec-pills">
+                    <span class="pill pill-category">${item.category || 'General'}</span>
+                    <span class="pill pill-difficulty">Diff ${item.difficulty}/5 (${difficultyStars})</span>
+                    <span class="pill">${item.strategy}</span>
+                  </div>
+                  <p class="rec-explanation">${item.explanation || 'Recommended for your profile.'}</p>
+                </div>
+                <div class="score-bar-container">
+                  <div class="score-label">
+                    <span>Match Score</span>
+                    <span>${(item.score || 0).toFixed(4)} (${scorePct}%)</span>
+                  </div>
+                  <div class="score-bar">
+                    <div class="score-fill" style="width: ${Math.max(scorePct, 8)}%"></div>
+                  </div>
+                </div>
+              `;
+              cardsBox.appendChild(card);
+            });
+          }
+
+          document.getElementById('raw-json').innerText = JSON.stringify(data, null, 2);
+        } else {
+          alert('Error: ' + (data.error ? data.error.message : 'Failed to fetch recommendations'));
+        }
+      } catch (err) {
+        alert('Request failed: ' + err.message);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    function toggleJson() {
+      const box = document.getElementById('raw-json');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function checkRatingRequirement() {
+      const type = document.getElementById('fb-type').value;
+      const ratingGroup = document.getElementById('fb-rating-group');
+      ratingGroup.style.display = type === 'rate' ? 'flex' : 'none';
+    }
+
+    async function submitFeedback() {
+      const uid = parseInt(document.getElementById('fb-user-id').value);
+      const cid = parseInt(document.getElementById('fb-content-id').value);
+      const type = document.getElementById('fb-type').value;
+      const btn = document.getElementById('fb-btn');
+      const statusBox = document.getElementById('fb-status');
+
+      const payload = { user_id: uid, content_id: cid, type: type };
+      if (type === 'rate') {
+        payload.rating = parseFloat(document.getElementById('fb-rating').value);
+      }
+
+      btn.disabled = true;
+      try {
+        const res = await fetch('/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        statusBox.style.display = 'block';
+        if (res.ok) {
+          statusBox.style.background = 'rgba(16, 185, 129, 0.15)';
+          statusBox.style.color = '#34d399';
+          statusBox.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+          statusBox.innerHTML = `✓ Feedback recorded! User ${uid}'s cache invalidated. Try fetching recommendations again to see the updated scores.`;
+        } else {
+          statusBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          statusBox.style.color = '#f87171';
+          statusBox.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+          statusBox.innerHTML = `✗ Error: ${data.error?.message || 'Failed to submit feedback'}`;
+        }
+      } catch (err) {
+        statusBox.style.display = 'block';
+        statusBox.style.background = 'rgba(239, 68, 68, 0.15)';
+        statusBox.style.color = '#f87171';
+        statusBox.innerHTML = '✗ Request error: ' + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Run automatically on start
+    loadHealth();
+    runRecommendations();
+  </script>
+</body>
+</html>
