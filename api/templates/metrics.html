@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Metrics | Recommendation Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card-bg: rgba(22, 30, 46, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover-border: rgba(56, 189, 248, 0.35);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      --accent: #818cf8;
+      --success: #10b981;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 85% 80%, rgba(129, 140, 248, 0.07) 0%, transparent 40%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+    header {
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      background: rgba(11, 15, 23, 0.7);
+    }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: var(--primary-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .brand-text h1 { font-size: 1.05rem; font-weight: 700; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-1px); }
+    .hero { padding: 36px 0 24px; text-align: center; }
+    .hero h2 { font-size: 2rem; font-weight: 800; margin-bottom: 6px; }
+    .hero p { color: var(--text-muted); font-size: 0.95rem; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+    .stat-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: #ffffff;
+      margin-top: 4px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--card-border);
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    tr:last-child td { border-bottom: none; }
+    .endpoint-badge {
+      font-weight: 600;
+      color: var(--primary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .status-pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav-inner">
+      <a href="/" class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>Recommendation Engine</h1>
+        </div>
+      </a>
+      <div style="display: flex; gap: 10px;">
+        <a href="/" class="btn">← Dashboard</a>
+        <a href="/metrics?format=json" class="btn">Raw JSON</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="hero">
+      <h2>Service Performance & Metrics</h2>
+      <p>Real-time request metrics, latency percentiles, and cache performance</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Requests</div>
+        <div class="stat-val">{{ data.total_requests }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Uptime</div>
+        <div class="stat-val">{{ data.uptime_seconds }}s</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Cache Hit Rate</div>
+        <div class="stat-val">{{ data.recommender.cache.hit_rate }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Cache Size</div>
+        <div class="stat-val">{{ data.recommender.cache.size }}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Endpoint Latency Windows</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Endpoint</th>
+            <th>Requests</th>
+            <th>Avg (ms)</th>
+            <th>p50 (ms)</th>
+            <th>p95 (ms)</th>
+            <th>Max (ms)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ep, vals in data.endpoints.items() %}
+            <tr>
+              <td><span class="endpoint-badge">{{ ep }}</span></td>
+              <td>{{ vals.count }}</td>
+              <td>{{ vals.avg_ms }}</td>
+              <td>{{ vals.p50_ms }}</td>
+              <td>{{ vals.p95_ms }}</td>
+              <td>{{ vals.max_ms }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No requests recorded yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">HTTP Status Code Distribution</div>
+      <div class="status-pills">
+        {% for code, count in data.status_codes.items() %}
+          <div class="status-pill">
+            <span>{{ code }}</span>
+            <span style="opacity: 0.7;">&times; {{ count }}</span>
+          </div>
+        {% else %}
+          <span style="color: var(--text-muted); font-size: 0.85rem;">No status codes recorded yet.</span>
+        {% endfor %}
+      </div>
+    </div>
+  </main>
+</body>
+</html>

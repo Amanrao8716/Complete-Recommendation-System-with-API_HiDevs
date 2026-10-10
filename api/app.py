@@ -193,35 +193,37 @@ def create_app(database_url=None, api_key=None, orchestrator=None, cache_ttl=Non
     # ------------------------------------------------------------------
     # Endpoints
     # ------------------------------------------------------------------
+    def wants_html():
+        if request.args.get("format") == "html":
+            return True
+        if request.args.get("format") == "json":
+            return False
+        accept = request.headers.get("Accept", "")
+        return "text/html" in accept and "application/json" not in accept
+
     @app.get("/")
     def index():
-        accept = request.headers.get("Accept", "")
-        wants_json = (
-            request.args.get("format") == "json"
-            or ("application/json" in accept and "text/html" not in accept)
-            or ("text/html" not in accept and request.args.get("format") != "html")
+        if wants_html():
+            return render_template("index.html")
+        return jsonify(
+            {
+                "service": "Learning Content Recommendation System API",
+                "status": "online",
+                "request_id": g.request_id,
+                "endpoints": {
+                    "health": "/health",
+                    "recommend": "/recommend/<user_id>?limit=5&strategy=auto",
+                    "feedback": "/feedback",
+                    "metrics": "/metrics",
+                },
+                "strategies": sorted(VALID_STRATEGIES),
+                "documentation": {
+                    "interactive_ui": "/",
+                    "sample_recommendation": "/recommend/1?limit=5",
+                    "metrics_endpoint": "/metrics",
+                },
+            }
         )
-        if wants_json:
-            return jsonify(
-                {
-                    "service": "Learning Content Recommendation System API",
-                    "status": "online",
-                    "request_id": g.request_id,
-                    "endpoints": {
-                        "health": "/health",
-                        "recommend": "/recommend/<user_id>?limit=5&strategy=auto",
-                        "feedback": "/feedback",
-                        "metrics": "/metrics",
-                    },
-                    "strategies": sorted(VALID_STRATEGIES),
-                    "documentation": {
-                        "interactive_ui": "/",
-                        "sample_recommendation": "/recommend/1?limit=5",
-                        "metrics_endpoint": "/metrics",
-                    },
-                }
-            )
-        return render_template("index.html")
 
     @app.get("/health")
     def health():
@@ -240,12 +242,16 @@ def create_app(database_url=None, api_key=None, orchestrator=None, cache_ttl=Non
             "content_items": stats["content_items"],
             "request_id": g.request_id,
         }
+        if wants_html():
+            return render_template("health.html", data=body), status
         return jsonify(body), status
 
     @app.get("/metrics", endpoint="metrics")
     def metrics_endpoint():
         body = metrics.snapshot()
         body["recommender"] = orchestrator.stats()
+        if wants_html():
+            return render_template("metrics.html", data=body)
         return jsonify(body)
 
     @app.get("/recommend/<user_id>")
@@ -272,17 +278,18 @@ def create_app(database_url=None, api_key=None, orchestrator=None, cache_ttl=Non
         except InvalidRequestError as exc:
             raise ApiError(400, "invalid_request", str(exc))
         latency = (time.perf_counter() - g.start) * 1000
-        return jsonify(
-            {
-                "request_id": g.request_id,
-                "user_id": uid,
-                "strategy": result.strategy,
-                "count": len(result.items),
-                "cached": result.cached,
-                "latency_ms": round(latency, 2),
-                "recommendations": [i.to_dict() for i in result.items],
-            }
-        )
+        data = {
+            "request_id": g.request_id,
+            "user_id": uid,
+            "strategy": result.strategy,
+            "count": len(result.items),
+            "cached": result.cached,
+            "latency_ms": round(latency, 2),
+            "recommendations": [i.to_dict() for i in result.items],
+        }
+        if wants_html():
+            return render_template("recommend.html", data=data)
+        return jsonify(data)
 
     @app.post("/feedback")
     def feedback():

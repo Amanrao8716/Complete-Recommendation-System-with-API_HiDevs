@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recommendations for User {{ data.user_id }} | Recommendation Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card-bg: rgba(22, 30, 46, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover-border: rgba(56, 189, 248, 0.35);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      --accent: #818cf8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 85% 80%, rgba(129, 140, 248, 0.07) 0%, transparent 40%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+    header {
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      background: rgba(11, 15, 23, 0.7);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      background: var(--primary-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: #0b0f17;
+      font-weight: 700;
+      border: none;
+    }
+    .hero-strip {
+      padding: 32px 0 20px;
+    }
+    .hero-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-strategy {
+      background: rgba(129, 140, 248, 0.18);
+      color: #a5b4fc;
+      border: 1px solid rgba(129, 140, 248, 0.3);
+    }
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 14px 18px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+    .meta-item strong {
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .filter-panel {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .filter-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .form-control {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .form-control:focus {
+      border-color: var(--primary);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+    }
+    .rec-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+    .rec-card:hover {
+      border-color: var(--card-hover-border);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.35;
+    }
+    .card-rank {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      white-space: nowrap;
+    }
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px 0;
+    }
+    .pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .pill-cat {
+      background: rgba(129, 140, 248, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(129, 140, 248, 0.25);
+    }
+    .pill-diff {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+    .explanation {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 3px solid var(--primary);
+      line-height: 1.45;
+    }
+    .component-scores {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .comp-pill {
+      font-size: 0.68rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+    }
+    .score-box {
+      margin-top: 6px;
+    }
+    .score-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .score-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .score-fill {
+      height: 100%;
+      background: var(--primary-gradient);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav-inner">
+      <a href="/" class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>Recommendation Engine</h1>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <a href="/" class="btn">← Dashboard</a>
+        <a href="/recommend/{{ data.user_id }}?limit={{ data.count }}&strategy={{ data.strategy }}&format=json" class="btn">Raw JSON</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="hero-strip">
+      <div class="hero-title">
+        <span>Recommendations for User #{{ data.user_id }}</span>
+        <span class="badge badge-strategy">{{ data.strategy }}</span>
+      </div>
+    </div>
+
+    <!-- Quick Switcher Bar -->
+    <form class="filter-panel" method="GET" action="/recommend/{{ data.user_id }}" onsubmit="event.preventDefault(); switchParams();">
+      <div class="filter-group">
+        <label for="sw-uid">User ID</label>
+        <input type="number" id="sw-uid" class="form-control" value="{{ data.user_id }}" min="1" max="100" style="width: 100px;">
+      </div>
+      <div class="filter-group">
+        <label for="sw-strategy">Strategy</label>
+        <select id="sw-strategy" class="form-control">
+          {% for s in ['auto', 'hybrid', 'skill_based', 'collaborative', 'popularity', 'cold_start'] %}
+            <option value="{{ s }}" {% if data.strategy == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="sw-limit">Limit</label>
+        <input type="number" id="sw-limit" class="form-control" value="{{ data.count }}" min="1" max="20" style="width: 80px;">
+      </div>
+      <button type="submit" class="btn btn-primary" style="height: 38px;">Apply Filters</button>
+    </form>
+
+    <div class="meta-bar">
+      <span class="meta-item">Strategy: <strong>{{ data.strategy }}</strong></span>
+      <span class="meta-item">Cache: <strong>{% if data.cached %}Hit (Cached){% else %}Miss (Fresh Execution){% endif %}</strong></span>
+      <span class="meta-item">Latency: <strong>{{ data.latency_ms }} ms</strong></span>
+      <span class="meta-item">Items: <strong>{{ data.count }}</strong></span>
+      <span class="meta-item" style="color: #64748b; font-size: 0.75rem;">Trace: {{ data.request_id }}</span>
+    </div>
+
+    {% if data.recommendations %}
+      <div class="grid">
+        {% for rec in data.recommendations %}
+          <div class="rec-card">
+            <div>
+              <div class="card-top">
+                <h3 class="card-title">{{ rec.title }}</h3>
+                <span class="card-rank">#{{ loop.index }}</span>
+              </div>
+              <div class="pills">
+                <span class="pill pill-cat">{{ rec.category }}</span>
+                <span class="pill pill-diff">Diff {{ rec.difficulty }}/5</span>
+                <span class="pill" style="background: rgba(255,255,255,0.05); color: #94a3b8;">{{ rec.strategy }}</span>
+              </div>
+              <p class="explanation">{{ rec.explanation }}</p>
+
+              {% if rec.components %}
+                <div class="component-scores">
+                  {% for k, v in rec.components.items() %}
+                    {% if v > 0 %}
+                      <span class="comp-pill">{{ k }}: {{ v }}</span>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="score-box">
+              <div class="score-meta">
+                <span>Match Score</span>
+                <span>{{ "%.4f"|format(rec.score) }} ({{ (rec.score * 100)|round|int }}%)</span>
+              </div>
+              <div class="score-bar">
+                <div class="score-fill" style="width: {{ [((rec.score * 100)|round|int), 10]|max }}%;"></div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <h3>No recommendations found</h3>
+        <p>This user has no recommendations matching the current criteria or has already consumed all eligible items.</p>
+      </div>
+    {% endif %}
+  </main>
+
+  <script>
+    function switchParams() {
+      const uid = document.getElementById('sw-uid').value;
+      const strat = document.getElementById('sw-strategy').value;
+      const limit = document.getElementById('sw-limit').value;
+      window.location.href = `/recommend/${uid}?limit=${limit}&strategy=${strat}`;
+    }
+  </script>
+</body>
+</html>

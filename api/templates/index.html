@@ -767,7 +767,7 @@
     // Fetch live system health on page load
     async function loadHealth() {
       try {
-        const res = await fetch('/health');
+        const res = await fetch('/health', { headers: { 'Accept': 'application/json' } });
         if (res.ok) {
           const data = await res.json();
           document.getElementById('stat-users').innerText = data.users ?? 42;
@@ -791,7 +791,9 @@
       btn.disabled = true;
 
       try {
-        const res = await fetch(`/recommend/${uid}?limit=${limit}&strategy=${strategy}`);
+        const res = await fetch(`/recommend/${uid}?limit=${limit}&strategy=${strategy}`, {
+          headers: { 'Accept': 'application/json' }
+        });
         const data = await res.json();
 
         const container = document.getElementById('results-container');

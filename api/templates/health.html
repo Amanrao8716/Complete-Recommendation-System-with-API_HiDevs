@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Health | Recommendation Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card-bg: rgba(22, 30, 46, 0.8);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      --success: #10b981;
+      --danger: #ef4444;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 85% 80%, rgba(16, 185, 129, 0.07) 0%, transparent 40%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      background: rgba(11, 15, 23, 0.7);
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
+    }
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: var(--primary-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-1px);
+    }
+    .content {
+      flex: 1;
+      padding: 48px 0;
+    }
+    .status-hero {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .status-ok {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .status-error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 10px currentColor;
+    }
+    .status-hero h2 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .status-hero p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 22px;
+      backdrop-filter: blur(10px);
+    }
+    .card-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .card-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: #ffffff;
+    }
+    .card-meta {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .details-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.9rem;
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: var(--text-muted); }
+    .detail-val {
+      font-family: 'JetBrains Mono', monospace;
+      color: #f8fafc;
+      font-weight: 600;
+    }
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 32px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav-inner">
+      <a href="/" class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>Recommendation Engine</h1>
+        </div>
+      </a>
+      <div style="display: flex; gap: 10px;">
+        <a href="/" class="btn">← Dashboard</a>
+        <a href="/health?format=json" class="btn">Raw JSON</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="container">
+      <div class="status-hero">
+        {% if data.status == 'ok' %}
+          <div class="status-badge status-ok">
+            <span class="pulse-dot"></span> System Operational
+          </div>
+          <h2>All Systems Healthy</h2>
+          <p>Database connections and recommendation orchestrator are responding normally.</p>
+        {% else %}
+          <div class="status-badge status-error">
+            <span class="pulse-dot"></span> Service Degraded
+          </div>
+          <h2>System Attention Required</h2>
+          <p>Database connectivity or underlying components reported a degradation.</p>
+        {% endif %}
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">Database Status</div>
+          <div class="card-value" style="color: {% if data.database == 'ok' %}#34d399{% else %}#f87171{% endif %};">
+            {{ data.database | upper }}
+          </div>
+          <div class="card-meta">SQLite Engine pool connectivity</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Learners (Users)</div>
+          <div class="card-value">{{ data.users }}</div>
+          <div class="card-meta">Indexed active learner profiles</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Content Modules</div>
+          <div class="card-value">{{ data.content_items }}</div>
+          <div class="card-meta">Catalog items available for matching</div>
+        </div>
+      </div>
+
+      <div class="details-box">
+        <div class="detail-row">
+          <span class="detail-label">Endpoint Route</span>
+          <span class="detail-val">GET /health</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Request Trace ID</span>
+          <span class="detail-val">{{ data.request_id }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">HTTP Status Code</span>
+          <span class="detail-val">{% if data.status == 'ok' %}200 OK{% else %}503 Service Unavailable{% endif %}</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="/" class="btn" style="background: var(--primary-gradient); color: #0b0f17; font-weight: 700;">Explore Recommendations</a>
+        <a href="/metrics" class="btn">View Latency Metrics</a>
+        <a href="javascript:location.reload()" class="btn">🔄 Re-check</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

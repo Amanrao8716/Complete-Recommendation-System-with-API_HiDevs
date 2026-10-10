@@ -30,6 +30,33 @@ def test_index_html(client):
     assert b"Recommendation Engine" in response.data
 
 
+def test_health_html(client):
+    response = client.get(
+        "/health", headers={"Accept": "text/html,application/xhtml+xml"}
+    )
+    assert response.status_code == 200
+    assert "text/html" in response.content_type
+    assert b"System Operational" in response.data or b"Healthy" in response.data
+
+
+def test_recommend_html(client):
+    response = client.get(
+        "/recommend/1?limit=3", headers={"Accept": "text/html,application/xhtml+xml"}
+    )
+    assert response.status_code == 200
+    assert "text/html" in response.content_type
+    assert b"Recommendations for User" in response.data
+
+
+def test_metrics_html(client):
+    response = client.get(
+        "/metrics", headers={"Accept": "text/html,application/xhtml+xml"}
+    )
+    assert response.status_code == 200
+    assert "text/html" in response.content_type
+    assert b"Metrics" in response.data
+
+
 def test_recommend_success(client):
     response = client.get("/recommend/1?limit=3")
     body = response.get_json()
